@@ -19,18 +19,10 @@ function App() {
            </div>
 
            <div id ="join-game" className = "bg-white w-100 rounded-xl flex items-center px-2 gap-4">
-
-
-
             <input className = "w-50 border border-black rounded-lg" placeholder="GAME ID" />
-
             <button className="border border-gray-300 px-2 py-1 rounded-lg">
               JOIN
-              
             </button>
-
-
-
            </div>
 
         </div>
