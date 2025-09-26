@@ -5,13 +5,13 @@ type Cell = Player | undefined
 type gameStatus = "ongoing" | "tied" | "X" | "O"
 
 export class TicTacToe {
-    id: number;
+    id: number | undefined;
     board : Cell[][];
     gameStatus : gameStatus;
     currentPlayer : Player;
 
-    constructor(id: number) {
-        this.id = id
+    constructor() {
+        this.id = undefined;
         this.board = Array(3).fill(null).map(() => Array(3).fill(undefined))
         this.gameStatus = "ongoing";
         this.currentPlayer = "X";
