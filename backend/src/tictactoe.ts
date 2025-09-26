@@ -10,11 +10,18 @@ export class TicTacToe {
     gameStatus : gameStatus;
     currentPlayer : Player;
 
-    constructor() {
-        this.id = undefined;
-        this.board = Array(3).fill(null).map(() => Array(3).fill(undefined))
-        this.gameStatus = "ongoing";
-        this.currentPlayer = "X";
+    // constructor() {
+    //     this.id = undefined;
+    //     this.board = Array(3).fill(null).map(() => Array(3).fill(undefined))
+    //     this.gameStatus = "ongoing";
+    //     this.currentPlayer = "X";
+    // }
+
+    constructor(object?: Partial<TicTacToe>) {
+        this.id = object?.id;
+        this.board = object?.board ? object.board.map(row => [...row]) : Array(3).fill(null).map(() => Array(3).fill(undefined));
+        this.gameStatus = object?.gameStatus ?? "ongoing";
+        this.currentPlayer = object?.currentPlayer ?? "X";
     }
 
     getGameState() {
@@ -75,7 +82,7 @@ export class TicTacToe {
         
         //detect Tie
         if (this.gameStatus != "O" && this.gameStatus != "X") {
-            if (this.board.every(row => row.every(cell => cell !== undefined))) {
+            if (this.board.every(row => row.every(cell => !cell))) {
                 this.gameStatus = "tied";
             }
         }

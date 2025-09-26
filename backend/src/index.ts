@@ -31,23 +31,23 @@ app.use(cors())
 const dataStore = new DataStore();
 
 app.get("/create-game", async (req: Request, res: Response) => {
-    let newGameState = dataStore.create();
+    let newGameState = await dataStore.create();
     res.send(newGameState.getGameState());
 });
 
-app.get("/join-game/:id", (req: Request, res: Response) => {
+app.get("/join-game/:id", async (req: Request, res: Response) => {
     if (!req.params.id) {
         res.status(400).send("No id");
         return;
     }
     let join_id = parseInt(req.params.id);
 
-    let state = dataStore.read(join_id);
+    let state = await dataStore.read(join_id);
 
     res.send(state?.getGameState())
 })
 
-app.get("/make-move/:id/:x/:y", (req: Request, res: Response) => {
+app.get("/make-move/:id/:x/:y", async (req: Request, res: Response) => {
     if (!req.params.id) {
         res.status(400).send("No id");
         return;
@@ -66,7 +66,7 @@ app.get("/make-move/:id/:x/:y", (req: Request, res: Response) => {
         let x = parseInt(req.params.x);
         let y = parseInt(req.params.y);
 
-        let newstate = dataStore.read(join_id);
+        let newstate = await dataStore.read(join_id);
 
         if (!newstate) {
             res.status(404).send("Game not found");
@@ -75,7 +75,7 @@ app.get("/make-move/:id/:x/:y", (req: Request, res: Response) => {
         
         newstate.makeMove(x, y);
 
-        let updatedState = dataStore.update(join_id, newstate)
+        let updatedState = await dataStore.update(join_id, newstate)
 
 
         let state = updatedState?.getGameState();
@@ -91,20 +91,20 @@ app.get("/make-move/:id/:x/:y", (req: Request, res: Response) => {
     
 })
 
-app.get("/reset/:id", (req: Request, res: Response) => {
+app.get("/reset/:id", async (req: Request, res: Response) => {
     if (!req.params.id) {
         res.status(400).send("No id");
         return;
     }
     let join_id = parseInt(req.params.id);
 
-    let newstate = dataStore.read(join_id);
+    let newstate = await dataStore.read(join_id);
     if (!newstate) {
         res.status(404).send("Game not found");
         return;
     }
     newstate?.reset();
-    let updatedState = dataStore.update(join_id, newstate);
+    let updatedState = await dataStore.update(join_id, newstate);
 
 
     let state = updatedState?.getGameState();

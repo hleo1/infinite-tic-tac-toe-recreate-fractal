@@ -8,15 +8,7 @@ import { games } from "./schema";
 
 
 export class DataStore {
-    object: Record<number, TicTacToe> = {};
-    id: number;
-    
-    constructor() {
-        this.object = {};
-        this.id = 1;
-    }
-
-    async create() : TicTacToe {
+    async create() : Promise<TicTacToe> {
         // let GameState = new TicTacToe(this.id);
         // this.object[this.id] = GameState;
         // this.id++;
@@ -36,15 +28,55 @@ export class DataStore {
             throw new Error("Insert did not return a row");
         }
 
-        return { ...inserted, board: JSON.parse(inserted.board) }
+        return new TicTacToe({
+            id: inserted.id,
+            board: JSON.parse(inserted.board),
+            currentPlayer: inserted.currentPlayer as TicTacToe["currentPlayer"],
+            gameStatus: inserted.gameStatus as TicTacToe["gameStatus"],
+        })
+  
     }
 
-    read(id: number) : TicTacToe | undefined{
-        return(this.object[id]);
+    async read(id: number) : Promise<TicTacToe | undefined>{
+
+        const [fetched] = await db
+        .select()
+        .from(games)
+        .where(eq(games.id, id));
+
+        if (!fetched) {
+            throw new Error("Insert did not return a row");
+        }
+
+        return new TicTacToe({
+            id: fetched.id,
+            board: JSON.parse(fetched.board),
+            currentPlayer: fetched.currentPlayer as TicTacToe["currentPlayer"],
+            gameStatus: fetched.gameStatus as TicTacToe["gameStatus"],
+        })
     }
 
-    update(id: number, GameState : TicTacToe) : TicTacToe | undefined {
-        this.object[id] = GameState;
-        return(this.object[id])
+    async update(id: number, GameState: TicTacToe): Promise<TicTacToe | undefined> {
+        const [updated] = await db
+            .update(games)
+            .set({
+                board: JSON.stringify(GameState.board),
+                currentPlayer: GameState.currentPlayer,
+                gameStatus: GameState.gameStatus
+            })
+            .where(eq(games.id, id))
+            .returning();
+
+
+        if (!updated) {
+            throw new Error("Insert did not return a row");
+        }        
+        
+        return new TicTacToe({
+            id: updated.id,
+            board: JSON.parse(updated.board),
+            currentPlayer: updated.currentPlayer as TicTacToe["currentPlayer"],
+            gameStatus: updated.gameStatus as TicTacToe["gameStatus"],
+        });
     }
 }
