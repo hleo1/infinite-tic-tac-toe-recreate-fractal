@@ -28,7 +28,7 @@ export class TicTacToe {
     }
 
     makeMove(row: number, col: number) {
-        if (!this.board[row]![col]) {
+        if (this.board[row]![col]) {
             return;
         }
 

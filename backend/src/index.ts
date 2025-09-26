@@ -2,9 +2,12 @@ import express, { Request, Response } from "express";
 import cors from "cors"
 
 
+
 import { TicTacToe } from "./tictactoe";
 
 const app = express();
+
+
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -54,9 +57,15 @@ app.get("/make-move/:id/:x/:y", (req: Request, res: Response) => {
     try {
         let join_id = parseInt(req.params.id);
         let x = parseInt(req.params.x);
-        let y = parseInt(req.params.id);
-        object[join_id]?.makeMove(x, y);
-        res.send(object[join_id]?.getGameState())
+        let y = parseInt(req.params.y);
+        
+        if (!object[join_id]) {
+            res.status(404).send("Game not found");
+            return;
+        }
+        
+        object[join_id].makeMove(x, y);
+        res.send(object[join_id].getGameState())
     } catch (error) {
         res.status(400).send({error})
     }
