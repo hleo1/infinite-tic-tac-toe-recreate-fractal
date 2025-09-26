@@ -4,7 +4,7 @@ type Cell = Player | undefined
 
 type gameStatus = "ongoing" | "tied" | "X" | "O"
 
-class TicTacToe {
+export class TicTacToe {
     id: number;
     board : Cell[][];
     gameStatus : gameStatus;
