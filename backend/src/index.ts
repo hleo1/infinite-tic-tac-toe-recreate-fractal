@@ -1,4 +1,7 @@
 import express, { Request, Response } from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+
 import cors from "cors"
 
 
@@ -6,6 +9,15 @@ import cors from "cors"
 import { TicTacToe } from "./tictactoe";
 
 const app = express();
+
+const server = createServer(app); // 👈 wrap express
+const io = new Server(server, {
+  cors: {
+    origin: "*", // your React dev URL
+    methods: ["GET", "POST"]
+  }
+});
+
 
 
 const PORT = process.env.PORT || 3000;
@@ -65,7 +77,12 @@ app.get("/make-move/:id/:x/:y", (req: Request, res: Response) => {
         }
         
         object[join_id].makeMove(x, y);
-        res.send(object[join_id].getGameState())
+        let state = object[join_id].getGameState();
+
+        // 👇 notify everyone in the same room
+        io.to(`game-${join_id}`).emit("game-update", state);
+
+        res.send(state);
     } catch (error) {
         res.status(400).send({error})
     }
@@ -80,10 +97,26 @@ app.get("/reset/:id", (req: Request, res: Response) => {
     }
     let join_id = parseInt(req.params.id);
     object[join_id]?.reset();
-    res.send(object[join_id]?.getGameState())
+
+
+    let state = object[join_id]?.getGameState();
+
+    // 👇 notify everyone in the same room
+    io.to(`game-${join_id}`).emit("game-update", state);
+
+    res.send(state);
 
 })
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+io.on("connection", (socket) => {
+    // console.log("⚡ New client connected", socket.id);
+  
+    socket.on("join-game", (gameId: number) => {
+      socket.join(`game-${gameId}`);
+      console.log(`Client ${socket.id} joined game ${gameId}`);
+    });
+  });
+
+  server.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });

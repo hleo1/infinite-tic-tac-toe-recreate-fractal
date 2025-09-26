@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { io } from "socket.io-client";
+
 import './App.css'
 
 type Player = "X" | "O"
@@ -15,6 +15,9 @@ type TicTacToe = {
     gameStatus: gameStatus;
     currentPlayer: Player;
 }
+
+const socket = io("http://localhost:3000"); // 👈 connect once
+
 
 function App() {
   const [gameState, setGameState] = useState<TicTacToe>();
@@ -32,8 +35,24 @@ function App() {
 
   const joinGame = async () => {
     const response = await fetch("http://localhost:3000/join-game/" + gameID);
-    setGameState(await response.json())
-  }
+    let data = await response.json();
+    setGameState(data);
+  
+    // 👇 join socket room
+    socket.emit("join-game", gameID);
+  };
+
+  useEffect(() => {
+    socket.on("game-update", (newState) => {
+      setGameState(newState);
+    });
+  
+    return () => {
+      socket.off("game-update");
+    };
+  }, []);
+
+  
   const buttonClick = async (order: number) => {
     let row = Math.floor(order / 3);
     let col = order % 3; 
@@ -42,7 +61,7 @@ function App() {
     setGameState(await response.json())
   }
 
-  
+
 
   return (
     <>
